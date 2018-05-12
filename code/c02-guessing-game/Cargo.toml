@@ -1,0 +1,7 @@
+[package]
+name = "c02-guessing-game"
+version = "0.1.0"
+authors = ["Kenneth Powers <ken@kenpowers.net>"]
+
+[dependencies]
+rand = "0.3.14"
