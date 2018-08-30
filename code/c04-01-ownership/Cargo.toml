@@ -1,0 +1,6 @@
+[package]
+name = "c04-01-ownership"
+version = "0.1.0"
+authors = ["Kenneth Powers <ken@kenpowers.net>"]
+
+[dependencies]
