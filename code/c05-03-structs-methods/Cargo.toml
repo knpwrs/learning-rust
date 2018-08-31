@@ -1,0 +1,6 @@
+[package]
+name = "c05-03-structs-methods"
+version = "0.1.0"
+authors = ["Kenneth Powers <ken@kenpowers.net>"]
+
+[dependencies]
