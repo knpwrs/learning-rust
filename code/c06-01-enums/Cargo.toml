@@ -1,0 +1,6 @@
+[package]
+name = "c06-01-enums"
+version = "0.1.0"
+authors = ["Kenneth Powers <ken@kenpowers.net>"]
+
+[dependencies]
