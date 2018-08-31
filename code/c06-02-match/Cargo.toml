@@ -1,0 +1,6 @@
+[package]
+name = "c06-02-match"
+version = "0.1.0"
+authors = ["Kenneth Powers <ken@kenpowers.net>"]
+
+[dependencies]
