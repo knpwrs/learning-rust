@@ -30,13 +30,7 @@ pub fn run(config: Config) -> Result<(), Box<Error>> {
     let mut contents = String::new();
     f.read_to_string(&mut contents)?;
 
-    let results = if config.case_sensitive {
-        search(&config.needle, &contents)
-    } else {
-        search_case_insensitive(&config.needle, &contents)
-    };
-
-    for result in results {
+    for result in search(&config.needle, &contents, config.case_sensitive) {
         println!("{}", result);
     }
 
@@ -44,20 +38,17 @@ pub fn run(config: Config) -> Result<(), Box<Error>> {
 }
 
 // The data referenced by a slice needs to be valid for the reference to be valid
-fn search<'a>(needle: &str, haystack: &'a str) -> Vec<&'a str> {
-    haystack
+fn search<'a>(needle: &str, haystack: &'a str, case_sensitive: bool) -> Vec<&'a str> {
+    let iter = haystack
         .lines()
-        .filter(|line| line.contains(needle))
-        .map(|line| line.trim())
-        .collect()
-}
-
-fn search_case_insensitive<'a>(needle: &str, haystack: &'a str) -> Vec<&'a str> {
-    haystack
-        .lines()
-        .filter(|line| line.to_lowercase().contains(needle.to_lowercase().as_str()))
-        .map(|line| line.trim())
-        .collect()
+        .map(|line| line.trim());
+    if case_sensitive {
+        iter.filter(|line| line.contains(needle))
+            .collect()
+    } else {
+        iter.filter(|line| line.to_lowercase().contains(needle.to_lowercase().as_str()))
+            .collect()
+    }
 }
 
 #[cfg(test)]
@@ -74,7 +65,7 @@ mod tests {
           Duct tape.
         ";
         assert_eq!(
-            search(needle, haystack),
+            search(needle, haystack, true),
             vec!["safe, fast, productive."],
         );
     }
@@ -89,7 +80,7 @@ mod tests {
           Trust me.
         ";
         assert_eq!(
-            search_case_insensitive(needle, haystack),
+            search(needle, haystack, false),
             vec!["Rust:", "Trust me."],
         );
     }
