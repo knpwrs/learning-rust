@@ -1,0 +1,6 @@
+[package]
+name = "c13-02-iterators"
+version = "0.1.0"
+authors = ["Kenneth Powers <ken@kenpowers.net>"]
+
+[dependencies]
