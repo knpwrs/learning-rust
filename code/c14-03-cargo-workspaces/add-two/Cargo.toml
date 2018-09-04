@@ -1,0 +1,8 @@
+[package]
+name = "add-two"
+version = "0.1.0"
+authors = ["Kenneth Powers <ken@kenpowers.net>"]
+
+[dependencies]
+add = { path = "../add" }
+rand = "0.5.5"
