@@ -1,0 +1,6 @@
+[package]
+name = "c17-02-traits-polymorphism"
+version = "0.1.0"
+authors = ["Kenneth Powers <ken@kenpowers.net>"]
+
+[dependencies]
