@@ -13,30 +13,43 @@ impl<F: FnOnce()> FnBox for F {
 
 type Job = Box<FnBox + Send + 'static>;
 
+enum Message {
+    NewJob(Job),
+    Terminate,
+}
+
 struct Worker {
     id: usize,
-    thread: thread::JoinHandle<()>,
+    thread: Option<thread::JoinHandle<()>>,
 }
 
 impl Worker {
-    fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Job>>>) -> Worker {
+    fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Message>>>) -> Worker {
         let thread = thread::spawn(move || {
             loop {
                 let job = receiver.lock().unwrap().recv().unwrap();
-                // println!("Worker {} got a job; exucting...", id);
-                // (*job)(); // rust doesn't know what to do yet, maybe in the future...
-                job.call_box();
+                match job {
+                    Message::NewJob(job) => {
+                        // println!("Worker {} got a job; exucting...", id);
+                        // (*job)(); // rust doesn't know what to do yet, maybe in the future...
+                        job.call_box();
+                    },
+                    Message::Terminate => {
+                        println!("Worker {} was told to terminate.", id);
+                        break;
+                    },
+                }
                 // The MutexGuard returned from the lock method is dropped as soon as the let job
                 // statement ends. This ensures that the lock is held during the call to recv
             }
         });
-        Worker { id, thread }
+        Worker { id, thread: Some(thread) }
     }
 }
 
 pub struct ThreadPool {
     workers: Vec<Worker>,
-    sender: mpsc::Sender<Job>,
+    sender: mpsc::Sender<Message>,
 }
 
 impl ThreadPool {
@@ -61,6 +74,20 @@ impl ThreadPool {
         where F: FnOnce() + Send + 'static
     {
         let job = Box::new(f);
-        self.sender.send(job).unwrap();
+        self.sender.send(Message::NewJob(job)).unwrap();
+    }
+}
+
+impl Drop for ThreadPool {
+    fn drop(&mut self) {
+        for _ in &mut self.workers {
+            self.sender.send(Message::Terminate).unwrap();
+        }
+        for worker in &mut self.workers {
+            println!("Shutting down worker {}", worker.id);
+            if let Some(thread) = worker.thread.take() {
+                thread.join().unwrap();
+            }
+        }
     }
 }
